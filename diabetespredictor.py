@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 
 import pandas as pd
@@ -47,8 +49,7 @@ class DiabetesPredictor:
         Returns:
             None
         """
-        self.df = pd.read_csv(r"""C:\Users\pkstr\PycharmProjects\Diabetes_predictor
-                              \DiabetesPredictorProject\diabetes.csv"""
+        self.df = pd.read_csv(r"C:\Users\pkstr\PycharmProjects\Diabetes_predictor\DiabetesPredictorProject\diabetes.csv"
                               )
         self.X = None
         self.y = None
@@ -174,7 +175,8 @@ class DiabetesPredictor:
         self.RF_CV_results = pd.DataFrame(grid_search.cv_results_)
         self.RF_predictions = self.RF.predict(self.X_test)
         self.RF_Recall_score = recall_score(y_true=self.y_test,
-                                            y_pred=self.RF_predictions)
+                                            y_pred=self.RF_predictions
+                                            )
 
     def supportvectormachine(self, gamma, C, cv, random_state):
         """
@@ -229,47 +231,59 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Fits models and makes prediction as to
                                      whether or not a sample has diabetes"""
                                      )
-    parser.add_argument('n_estimators', type=list(int), help="""This is the number of trees in the
-                        RandomForestClassifier, specified as a list for the GridSearchCV to search
-                        over."""
+    parser.add_argument('--trees', type=int, nargs="+", dest="n_estimators",
+                        help="""This is the number of trees in the RandomForestClassifier, specified
+                        as a list for the GridSearchCV to search over."""
                         )
-    parser.add_argument('max_depth', type=list(int), help="""This is the maximum depth of each tree
-                        in the RandomForestClassifier, specified as a list for the GridSearchCV to search
-                        over."""
+    parser.add_argument('--max_depth', type=int, nargs="+", dest="max_depth",
+                        help="""This is the maximum depth of each tree in the RandomForestClassifier,
+                        specified as a list for the GridSearchCV to search over."""
                         )
-    parser.add_argument('cv_rf', type=int, help="""This is the number of folds in the cross validation
-                        for the RandomForestClassifier.""")
-    parser.add_argument('random_state_rf', type=int, help="""This is the seed of the randomization when
-                        constructing the splits in the cross validation for the RandomForestClassifier."""
+    parser.add_argument('--cv_rf', type=int, help="""This is the number of folds in the cross 
+                        validation for the RandomForestClassifier."""
                         )
-    parser.add_argument('gamma', type=list(float), help="""This is the list of possible values of 
-                        gamma for the GridSearchCV to search over. gamma (>0) controls the width of 
-                        the Gaussian kernel."""
+    parser.add_argument('--random_state_rf', type=int, help="""This is the seed of the 
+                        randomization when constructing the splits in the cross validation for 
+                        the RandomForestClassifier."""
                         )
-    parser.add_argument('C', type=list(float), help="""This is the list of possible values of C 
-                        for the GridSearchCV to search over.  C (>0) is a regularization parameter 
-                        which controls the size of the coefficient in the SVM."""
+    parser.add_argument('--gamma', type=float, nargs="+", dest="gamma",
+                        help="""This is the list of possible values of gamma for the GridSearchCV to 
+                        search over. gamma (>0) controls the width of the Gaussian kernel."""
                         )
-    parser.add_argument('cv_svm', type=int, help="""This is the number of folds in the cross validation
+    parser.add_argument('--C', type=float, nargs="+", dest="C",
+                        help="""This is the list of possible values of C for the GridSearchCV to search
+                        over.  C (>0) is a regularization parameter which controls the size of the 
+                        coefficient in the SVM."""
+                        )
+    parser.add_argument('--cv_svm', type=int, help="""This is the number of folds in the cross validation
                         for the SupportVectorClassifier."""
                         )
-    parser.add_argument('random_state_svm', type=int, help="""This is the seed of the randomization when
-                        constructing the splits in the cross validation for the SupportVectorClassifier."""
+    parser.add_argument('--random_state_svm', type=int, help="""This is the seed of 
+                        the randomization when constructing the splits in the cross validation for 
+                        the SupportVectorClassifier."""
                         )
     args = parser.parse_args()
+    print("X_train: \n {}".format(d.X_train))
+    print("y_train: \n {}".format(d.y_train))
+    print("X_test: \n {}".format(d.X_test))
+    print("n_estimators:{}".format(args.n_estimators))
+    print("max_depth:{}".format(args.max_depth))
+    print("Random Forest Cross Validation Folds:{}".format(args.cv_rf))
+    print("Random Forest random_state:{}".format(args.random_state_rf))
     d = DiabetesPredictor()
     d.randomforest(args.n_estimators, args.max_depth, args.cv_rf, args.random_state_rf)
-    print("X_train:{} \n".format(d.X_train))
-    print("y_train:{} \n".format(d.y_train))
-    print("X_test:{} \n".format(d.X_test))
     print("Random Forest best_estimator:{}".format(d.RF))
-    print("Random Forest Cross-Validation results:{}".format(d.RF_CV_results))
-    print("Random Forest Predictions:{}, length:{}".format(d.RF_predictions, len(d.RF_predictions)))
-    print("y_test:{}".format(d.y_test))
+    print("Random Forest Cross-Validation results: \n {}".format(d.RF_CV_results))
+    print("Random Forest Predictions: \n {}".format(d.RF_predictions))
+    print("y_test: \n {}".format(d.y_test))
     print("Random Forest Recall Score:{}".format(d.RF_Recall_score))
     d.supportvectormachine(args.gamma, args.C, args.cv_svm, args.random_state_svm)
+    print("Support Vector Machine gamma:{}".format(args.gamma))
+    print("Support Vector Machine C:{}".format(args.C))
+    print("Support Vector Machine Cross Validation Folds:{}".format(args.cv_svm))
+    print("Support Vector Machine random_state:{}".format(args.random_state_svm))
     print("Support Vector Machine best_estimator:{}".format(d.SVM))
-    print("Support Vector Machine Cross-Validation results:{}".format(d.SVM_CV_results))
-    print("Random Forest Predictions:{}, length:{}".format(d.SVM_predictions, len(d.SVM_predictions)))
+    print("Support Vector Machine Cross-Validation results: \n {}".format(d.SVM_CV_results))
+    print("Random Forest Predictions: \n {}".format(d.SVM_predictions))
     print("y_test:{}".format(d.y_test))
-    print("Support Vector Machine Recall Score:{}".format(d.SVM_Recall_score))
+    print("Support Vector Machine Recall Score:{} \n".format(d.SVM_Recall_score))
