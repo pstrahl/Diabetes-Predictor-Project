@@ -67,6 +67,12 @@ class DiabetesPredictor:
         self.SVM_predictions = None
         self.SVM_Recall_score = None
 
+    def __repr__(self):
+        """
+        Print the current feature and target dataframes.
+        """
+        return "X: \n {} \n y: \n {}".format(self.X, self.y)
+
     def get_features_and_target(self):
         """
         Create X and y from df.
@@ -231,43 +237,44 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Fits models and makes prediction as to
                                      whether or not a sample has diabetes"""
                                      )
-    parser.add_argument('--trees', type=int, nargs="+", dest="n_estimators",
+    parser.add_argument('--trees', type=int, nargs="+", dest="n_estimators", default=[100],
                         help="""This is the number of trees in the RandomForestClassifier, specified
                         as a list for the GridSearchCV to search over."""
                         )
-    parser.add_argument('--max_depth', type=int, nargs="+", dest="max_depth",
+    parser.add_argument('--max_depth', type=int, nargs="+", dest="max_depth", default=[10],
                         help="""This is the maximum depth of each tree in the RandomForestClassifier,
                         specified as a list for the GridSearchCV to search over."""
                         )
-    parser.add_argument('--cv_rf', type=int, help="""This is the number of folds in the cross 
-                        validation for the RandomForestClassifier."""
+    parser.add_argument('--cv_rf', type=int, default=5, help="""This is the number of folds in 
+                        the cross validation for the RandomForestClassifier."""
                         )
-    parser.add_argument('--random_state_rf', type=int, help="""This is the seed of the 
+    parser.add_argument('--random_state_rf', type=int, default=0, help="""This is the seed of the 
                         randomization when constructing the splits in the cross validation for 
                         the RandomForestClassifier."""
                         )
-    parser.add_argument('--gamma', type=float, nargs="+", dest="gamma",
+    parser.add_argument('--gamma', type=float, nargs="+", dest="gamma", default=[0.1],
                         help="""This is the list of possible values of gamma for the GridSearchCV to 
                         search over. gamma (>0) controls the width of the Gaussian kernel."""
                         )
-    parser.add_argument('--C', type=float, nargs="+", dest="C",
+    parser.add_argument('--C', type=float, nargs="+", dest="C", default=[100],
                         help="""This is the list of possible values of C for the GridSearchCV to search
                         over.  C (>0) is a regularization parameter which controls the size of the 
                         coefficient in the SVM."""
                         )
-    parser.add_argument('--cv_svm', type=int, help="""This is the number of folds in the cross validation
-                        for the SupportVectorClassifier."""
+    parser.add_argument('--cv_svm', type=int, default=5, help="""This is the number of folds in the 
+                        cross validation for the SupportVectorClassifier."""
                         )
-    parser.add_argument('--random_state_svm', type=int, help="""This is the seed of 
+    parser.add_argument('--random_state_svm', type=int, default=0, help="""This is the seed of 
                         the randomization when constructing the splits in the cross validation for 
                         the SupportVectorClassifier."""
                         )
     args = parser.parse_args()
     d = DiabetesPredictor()
+    d.randomforest(args.n_estimators, args.max_depth, args.cv_rf, args.random_state_rf)
+    print(d)
     print("X_train: \n {}".format(d.X_train))
     print("y_train: \n {}".format(d.y_train))
     print("X_test: \n {}".format(d.X_test))
-    d.randomforest(args.n_estimators, args.max_depth, args.cv_rf, args.random_state_rf)
     print("n_estimators:{}".format(args.n_estimators))
     print("max_depth:{}".format(args.max_depth))
     print("Random Forest Cross Validation Folds:{}".format(args.cv_rf))
