@@ -1,8 +1,9 @@
+import argparse
+
 import pandas as pd
-import sklearn
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import KNNImputer
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
@@ -11,7 +12,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import recall_score
 
 
-class Diabetes_Predictor():
+class DiabetesPredictor:
     """
     This class uses various models to predict diabetes in a patient.
 
@@ -52,8 +53,20 @@ class Diabetes_Predictor():
         self.X = None
         self.y = None
         self.random_state = random_state
+        self.X_train = None
+        self.X_test = None
+        self.y_train = None
+        self.y_test = None
+        self.RF = None
+        self.RF_CV_results = None
+        self.RF_predictions = None
+        self.RF_Recall_score = None
+        self.SVM = None
+        self.SVM_CV_results = None
+        self.SVM_predictions = None
+        self.SVM_Recall_score = None
 
-    def get_X_and_y(self):
+    def get_features_and_target(self):
         """
         Create X and y from df.
 
@@ -104,14 +117,14 @@ class Diabetes_Predictor():
         Returns:
             None
         """
-        self.get_X_and_y()
+        self.get_features_and_target()
         self.replace_zero_w_nan()
         self.remove_skew()
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y,
                                                                                 random_state=self.random_state,
                                                                                 stratify=self.y)
 
-    def RandomForest(self, n_estimators, max_depth, cv, random_state):
+    def randomforest(self, n_estimators, max_depth, cv, random_state):
         """
         Construct a Random Forest Classifier and compute the recall score.
 
@@ -163,7 +176,7 @@ class Diabetes_Predictor():
         self.RF_Recall_score = recall_score(y_true=self.y_test,
                                             y_pred=self.RF_predictions)
 
-    def SupportVectorMachine(self, gamma, C, cv, random_state):
+    def supportvectormachine(self, gamma, C, cv, random_state):
         """
         Construct a Support Vector Classifier with the rbf kernel and compute the f1 score.
 
@@ -211,40 +224,41 @@ class Diabetes_Predictor():
         self.SVM_Recall_score = recall_score(y_true=self.y_test,
                                              y_pred=self.SVM_predictions)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Fits models and makes prediction as to
                                      whether or not a sample has diabetes"""
                                      )
-    parser.add_argument('n_estimators', type = list(int), help = """This is the number of trees in the
+    parser.add_argument('n_estimators', type=list(int), help="""This is the number of trees in the
                         RandomForestClassifier, specified as a list for the GridSearchCV to search
                         over."""
                         )
-    parser.add_argument('max_depth', type = list(int), help = """This is the maximum depth of each tree
+    parser.add_argument('max_depth', type=list(int), help="""This is the maximum depth of each tree
                         in the RandomForestClassifier, specified as a list for the GridSearchCV to search
                         over."""
                         )
-    parser.add_argument('cv_rf', type = int, help = """This is the number of folds in the cross validation
+    parser.add_argument('cv_rf', type=int, help="""This is the number of folds in the cross validation
                         for the RandomForestClassifier.""")
-    parser.add_argument('random_state_rf', type = int, help = """This is the seed of the randomization when
+    parser.add_argument('random_state_rf', type=int, help="""This is the seed of the randomization when
                         constructing the splits in the cross validation for the RandomForestClassifier."""
                         )
-    parser.add_argument('gamma', type = list(float), help = """This is the list of possible values of 
+    parser.add_argument('gamma', type=list(float), help="""This is the list of possible values of 
                         gamma for the GridSearchCV to search over. gamma (>0) controls the width of 
                         the Gaussian kernel."""
                         )
-    parser.add_argument('C', type = list(float), help = """This is the list of possible values of C 
+    parser.add_argument('C', type=list(float), help="""This is the list of possible values of C 
                         for the GridSearchCV to search over.  C (>0) is a regularization parameter 
                         which controls the size of the coefficient in the SVM."""
                         )
-    parser.add_argument('cv_svm', type = int, help = """This is the number of folds in the cross validation
+    parser.add_argument('cv_svm', type=int, help="""This is the number of folds in the cross validation
                         for the SupportVectorClassifier."""
                         )
-    parser.add_argument('random_state_svm', type = int, help = """This is the seed of the randomization when
+    parser.add_argument('random_state_svm', type=int, help="""This is the seed of the randomization when
                         constructing the splits in the cross validation for the SupportVectorClassifier."""
                         )
     args = parser.parse_args()
-    d = diabetes_predictor()
-    RF = d.RandomForest(args.n_estimators, args.max_depth, args.cv_rf, args.random_state_rf)
+    d = DiabetesPredictor()
+    d.randomforest(args.n_estimators, args.max_depth, args.cv_rf, args.random_state_rf)
     print("X_train:{} \n".format(d.X_train))
     print("y_train:{} \n".format(d.y_train))
     print("X_test:{} \n".format(d.X_test))
@@ -253,12 +267,9 @@ if __name__ == '__main__':
     print("Random Forest Predictions:{}, length:{}".format(d.RF_predictions, len(d.RF_predictions)))
     print("y_test:{}".format(d.y_test))
     print("Random Forest Recall Score:{}".format(d.RF_Recall_score))
-    SVM = d.SupportVectorMachine(args.gamma, args.C, args.cv_svm, args.random_state_svm)
+    d.supportvectormachine(args.gamma, args.C, args.cv_svm, args.random_state_svm)
     print("Support Vector Machine best_estimator:{}".format(d.SVM))
     print("Support Vector Machine Cross-Validation results:{}".format(d.SVM_CV_results))
     print("Random Forest Predictions:{}, length:{}".format(d.SVM_predictions, len(d.SVM_predictions)))
     print("y_test:{}".format(d.y_test))
     print("Support Vector Machine Recall Score:{}".format(d.SVM_Recall_score))
-
-
-
