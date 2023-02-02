@@ -1,4 +1,4 @@
-# DiabetesPredictorProject
+# Diabetes Predictor Project
 This project uses different models to predict diabetes in a patient using the data from the Predict Diabetes dataset on Kaggle.
 
 ## Objective
